@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A1410">
+<title>Formulario de Visitante — MICAR Church</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A96E;
+    --gold-light: #E8D5B0;
+    --gold-dark: #A07840;
+    --cream: #FAF7F2;
+    --warm-white: #FFF9F0;
+    --deep: #1A1410;
+    --mid: #3D2E1E;
+    --muted: #8B7355;
+    --border: rgba(201,169,110,0.25);
+    --shadow: rgba(58,40,20,0.12);
+    --tap-min: 48px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    color: var(--deep);
+    overflow-x: hidden;
+    padding-top: 56px; /* settings bar height */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(201,169,110,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 90%, rgba(201,169,110,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Settings bar ── */
+  .settings-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--deep);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+
+  .settings-bar-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .settings-bar input[type="tel"] {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    outline: none;
+    height: 38px;
+    -webkit-appearance: none;
+  }
+  .settings-bar input[type="tel"]::placeholder { color: rgba(255,255,255,0.3); }
+  .settings-bar input[type="tel"]:focus { border-color: var(--gold); background: rgba(255,255,255,0.12); }
+
+  .btn-save-number {
+    padding: 0 14px;
+    height: 38px;
+    background: var(--gold);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+  }
+  .btn-save-number:active { background: var(--gold-dark); }
+
+  .settings-saved-msg {
+    font-size: 12px;
+    color: #6fcf97;
+    display: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 36px 16px 80px;
+  }
+
+  /* ── Header ── */
+  .church-header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .cross-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+  .cross-divider::before,
+  .cross-divider::after {
+    content: '';
+    height: 1px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+  }
+  .cross-divider::after { background: linear-gradient(90deg, var(--gold), transparent); }
+  .cross-icon { font-size: 20px; color: var(--gold); }
+
+  .church-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 7vw, 44px);
+    font-weight: 300;
+    color: var(--mid);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  h1 em { font-style: italic; color: var(--gold-dark); }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    padding: 0 8px;
+    line-height: 1.5;
+  }
+
+  /* ── Form card ── */
+  .form-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 20px;
+    box-shadow: 0 2px 32px var(--shadow);
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Field groups ── */
+  .fields-stack { display: flex; flex-direction: column; gap: 16px; }
+
+  .fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .field-group label {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field-group label .req { color: var(--gold-dark); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"] {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 8px;
+    background: rgba(255,252,248,0.9);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; /* 16px prevents iOS zoom on focus */
+    color: var(--deep);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: var(--tap-min);
+  }
+  input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
+    background: #fff;
+  }
+  .field-group.has-error input { border-color: #C0392B; }
+  .error-msg { font-size: 11px; color: #C0392B; display: none; }
+  .field-group.has-error .error-msg { display: block; }
+
+  #fecha { color: var(--muted); background: rgba(250,247,242,0.6); }
+
+  /* ── Separator ── */
+  .form-sep { height: 1px; background: var(--border); margin: 28px 0; }
+
+  /* ── Subsection title ── */
+  .sub-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Checkboxes & radios ── */
+  .checks-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    cursor: pointer;
+    min-height: var(--tap-min);
+    border-bottom: 1px solid rgba(201,169,110,0.08);
+  }
+  .check-item:last-child { border-bottom: none; }
+
+  .check-item input[type="checkbox"],
+  .check-item input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid rgba(201,169,110,0.5);
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .check-item input[type="radio"] { border-radius: 50%; }
+  .check-item input[type="checkbox"]:checked,
+  .check-item input[type="radio"]:checked { background: var(--gold); border-color: var(--gold); }
+  .check-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px; color: #fff; font-weight: 700; line-height: 1;
+  }
+  .check-item input[type="radio"]:checked::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    border-radius: 50%; background: #fff;
+  }
+  .check-item span {
+    font-size: 15px;
+    color: var(--mid);
+    font-weight: 400;
+    line-height: 1.3;
+    user-select: none;
+  }
+
+  /* ── Age chips ── */
+  .age-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .age-chip { position: relative; }
+  .age-chip input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .age-chip label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    min-height: var(--tap-min);
+    border: 1px solid rgba(201,169,110,0.4);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .age-chip input:checked + label { background: var(--gold); border-color: var(--gold); color: #fff; }
+
+  .age-required-msg { font-size: 11px; color: #C0392B; display: none; margin-top: 6px; }
+  .age-error .age-required-msg { display: block; }
+
+  /* ── Family toggle ── */
+  .family-toggle-row {
+    margin-top: 0;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: rgba(201,169,110,0.04);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    min-height: var(--tap-min);
+    touch-action: manipulation;
+  }
+  .family-toggle-row:active { background: rgba(201,169,110,0.1); }
+
+  .family-toggle-row input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 24px; height: 24px; min-width: 24px;
+    border: 1.5px solid rgba(201,169,110,0.5);
+    border-radius: 5px; background: #fff;
+    cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s; position: relative;
+  }
+  .family-toggle-row input[type="checkbox"]:checked { background: var(--gold); border-color: var(--gold); }
+  .family-toggle-row input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px; color: #fff; font-weight: 700;
+  }
+  .family-toggle-label { font-size: 15px; color: var(--mid); font-weight: 500; user-select: none; }
+  .family-toggle-label small { font-size: 12px; color: var(--muted); font-weight: 300; display: block; margin-top: 2px; }
+
+  #family-section { display: none; margin-top: 20px; }
+
+  .family-member-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px 16px;
+    margin-bottom: 14px;
+    background: rgba(255,252,248,0.7);
+    animation: fadeUp 0.25s ease both;
+  }
+  .family-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .family-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mid);
+  }
+  .btn-remove-member {
+    padding: 8px 14px;
+    min-height: var(--tap-min);
+    background: none;
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 6px;
+    color: #C0392B;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn-remove-member:active { background: #C0392B; color: #fff; }
+
+  .btn-add-member {
+    width: 100%;
+    padding: 14px;
+    min-height: var(--tap-min);
+    border: 1.5px dashed rgba(201,169,110,0.5);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gold-dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+    margin-top: 4px;
+  }
+  .btn-add-member:active { background: rgba(201,169,110,0.1); }
+
+  /* ── Submit ── */
+  .submit-wrap { margin-top: 36px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  .btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 340px;
+    padding: 16px 24px;
+    min-height: var(--tap-min);
+    background: var(--gold);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(160,120,64,0.35);
+    touch-action: manipulation;
+    -webkit-appearance: none;
+  }
+  .btn-submit:active { background: var(--gold-dark); transform: scale(0.98); }
+  .btn-submit .wa-icon { font-size: 20px; }
+
+  .submit-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 16px; }
+
+  /* ── Success ── */
+  #success-screen {
+    display: none;
+    text-align: center;
+    padding: 52px 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .success-icon { font-size: 56px; margin-bottom: 16px; }
+  .success-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; color: var(--mid); margin-bottom: 8px; }
+  .success-sub { font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+
+  .btn-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 36px;
+    min-height: var(--tap-min);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    color: var(--gold-dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: transparent;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+  }
+  .btn-reset:active { background: var(--gold); color: #fff; }
+
+  /* ── Animations ── */
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp   { from { opacity: 0; transform: translateY(12px);  } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- Settings bar -->
+<div class="settings-bar">
+  <span class="settings-bar-label">Enviar a:</span>
+  <input type="tel" id="settings-number" placeholder="+1 (407) 393-7977" inputmode="tel" />
+  <button class="btn-save-number" onclick="saveNumber()">Guardar</button>
+  <span class="settings-saved-msg" id="saved-msg">✓</span>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="church-header">
+    <p class="church-name">MICAR Church — Kissimmee, FL</p>
+    <div class="cross-divider"><span class="cross-icon">✝</span></div>
+    <h1>Bienvenido a <em>nuestra iglesia</em></h1>
+    <p class="subtitle">Por favor complete el formulario. ¡Nos alegra tenerle aquí!</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+
+    <!-- Success screen -->
+    <div id="success-screen">
+      <div class="success-icon">🙏</div>
+      <h2 class="success-title">¡Gracias por visitarnos!</h2>
+      <p class="success-sub">Su información fue enviada exitosamente.<br>Que Dios le bendiga.</p>
+      <button class="btn-reset" onclick="resetForm()">Nuevo Formulario</button>
+    </div>
+
+    <!-- Form body -->
+    <div id="form-body">
+
+      <!-- Sección 1: Info personal -->
+      <p class="section-label">Información Personal</p>
+      <div class="fields-stack">
+
+        <div class="field-group">
+          <label>Fecha</label>
+          <input type="date" id="fecha" readonly />
+        </div>
+
+        <div class="field-group" id="fg-nombre">
+          <label>Nombre <span class="req">*</span></label>
+          <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="name" />
+          <span class="error-msg">Por favor ingrese su nombre.</span>
+        </div>
+
+        <div class="field-group" id="fg-direccion">
+          <label>Dirección <span class="req">*</span></label>
+          <input type="text" id="direccion" placeholder="Calle y número" autocomplete="street-address" />
+          <span class="error-msg">Por favor ingrese su dirección.</span>
+        </div>
+
+        <div class="field-group" id="fg-ciudad">
+          <label>Ciudad <span class="req">*</span></label>
+          <input type="text" id="ciudad" placeholder="Ciudad" autocomplete="address-level2" />
+          <span class="error-msg">Campo requerido.</span>
+        </div>
+
+        <div class="fields-row">
+          <div class="field-group" id="fg-estado">
+            <label>Estado <span class="req">*</span></label>
+            <input type="text" id="estado" placeholder="Estado" autocomplete="address-level1" />
+            <span class="error-msg">Campo requerido.</span>
+          </div>
+          <div class="field-group" id="fg-cp">
+            <label>Código Postal <span class="req">*</span></label>
+            <input type="text" id="cp" placeholder="00000" maxlength="10" inputmode="numeric" autocomplete="postal-code" />
+            <span class="error-msg">Campo requerido.</span>
+          </div>
+        </div>
+
+        <div class="field-group" id="fg-telefono">
+          <label>Teléfono Celular <span class="req">*</span></label>
+          <input type="tel" id="telefono" placeholder="(000) 000-0000" inputmode="tel" autocomplete="tel" />
+          <span class="error-msg">Por favor ingrese su teléfono.</span>
+        </div>
+
+        <div class="field-group" id="fg-email">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="correo@ejemplo.com" inputmode="email" autocomplete="email" />
+          <span class="error-msg">Por favor ingrese un email válido.</span>
+        </div>
+
+      </div>
+
+      <div class="form-sep"></div>
+
+      <!-- Sección 2: Opciones -->
+      <p class="section-label">Marque lo que le corresponde</p>
+
+      <p class="sub-title">Tipo de visita</p>
+      <div class="checks-list">
+        <label class="check-item"><input type="checkbox" name="visita" value="Primera vez que visita" /><span>Primera vez que visita</span></label>
+        <label class="check-item"><input type="checkbox" name="visita" value="Segunda visita" /><span>Segunda visita</span></label>
+        <label class="check-item"><input type="checkbox" name="visita" value="Nuevo en el vecindario" /><span>Nuevo en el vecindario</span></label>
+        <label class="check-item"><input type="checkbox" name="visita" value="Desearía una visita a domicilio" /><span>Desearía una visita a domicilio</span></label>
+        <label class="check-item"><input type="checkbox" name="visita" value="Me gustaría pertenecer a la iglesia" /><span>Me gustaría pertenecer a la iglesia</span></label>
+        <label class="check-item"><input type="checkbox" name="visita" value="Otro" /><span>Otro</span></label>
+      </div>
+
+      <p class="sub-title">Estado civil</p>
+      <div class="checks-list" style="margin-bottom:0;">
+        <label class="check-item"><input type="radio" name="estado_civil" value="Casado/a" /><span>Casado/a</span></label>
+        <label class="check-item"><input type="radio" name="estado_civil" value="Soltero/a" /><span>Soltero/a</span></label>
+        <label class="check-item"><input type="radio" name="estado_civil" value="Padre o madre sin pareja" /><span>Padre o madre sin pareja</span></label>
+        <label class="check-item"><input type="radio" name="estado_civil" value="Viudo/a" /><span>Viudo/a</span></label>
+      </div>
+
+      <div class="form-sep"></div>
+
+      <p class="sub-title">Edad <span style="color:#C0392B;">*</span></p>
+      <div class="age-chips" id="age-group">
+        <div class="age-chip"><input type="radio" name="edad" id="edad-20s" value="20s"><label for="edad-20s">20s</label></div>
+        <div class="age-chip"><input type="radio" name="edad" id="edad-30s" value="30s"><label for="edad-30s">30s</label></div>
+        <div class="age-chip"><input type="radio" name="edad" id="edad-40s" value="40s"><label for="edad-40s">40s</label></div>
+        <div class="age-chip"><input type="radio" name="edad" id="edad-50s" value="50s"><label for="edad-50s">50s</label></div>
+        <div class="age-chip"><input type="radio" name="edad" id="edad-70mas" value="Más de 70"><label for="edad-70mas">Más de 70</label></div>
+      </div>
+      <p class="age-required-msg" id="age-error-msg">Por favor seleccione un rango de edad.</p>
+
+      <div class="form-sep"></div>
+
+      <!-- Sección 3: Iglesia -->
+      <p class="section-label">Iglesia & Invitación</p>
+      <div class="fields-stack">
+        <div class="field-group">
+          <label>Miembro de qué iglesia <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0;">(si aplica)</span></label>
+          <input type="text" id="iglesia" placeholder="Nombre de su iglesia actual" />
+        </div>
+        <div class="field-group" id="fg-invitado">
+          <label>Vine invitado/a por <span class="req">*</span></label>
+          <input type="text" id="invitado" placeholder="Nombre de quien le invitó" />
+          <span class="error-msg">Por favor ingrese quién le invitó.</span>
+        </div>
+      </div>
+
+      <div class="form-sep"></div>
+
+      <!-- Familia -->
+      <div class="family-toggle-row" onclick="toggleFamilyClick()">
+        <input type="checkbox" id="tiene-familia" onclick="event.stopPropagation(); toggleFamily(this)" />
+        <div class="family-toggle-label">
+          ¿Viene acompañado con familia?
+          <small>Toque para agregar información de familiares</small>
+        </div>
+      </div>
+
+      <div id="family-section">
+        <p class="section-label" style="margin:20px 0 16px;">Familiares</p>
+        <div id="family-members-container"></div>
+        <button class="btn-add-member" onclick="addFamilyMember()">+ Agregar familiar</button>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-wrap">
+        <button class="btn-submit" onclick="submitForm()">
+          <span class="wa-icon">💬</span>
+          Enviar por WhatsApp
+        </button>
+        <p class="submit-note">Se abrirá WhatsApp con el mensaje listo para enviar.</p>
+      </div>
+
+    </div><!-- end form-body -->
+  </div><!-- end form-card -->
+</div><!-- end page-wrapper -->
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const DEFAULT_NUMBER = "14073937977";
+
+  function getNumber() {
+    return localStorage.getItem('wa_recipient') || DEFAULT_NUMBER;
+  }
+
+  function formatDisplay(num) {
+    const d = num.replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '1') return `+1 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+    return '+' + d;
+  }
+
+  function updateRecipientDisplay() {
+    document.getElementById('settings-number').placeholder = formatDisplay(getNumber());
+  }
+
+  function saveNumber() {
+    const input = document.getElementById('settings-number').value.trim();
+    const digits = input.replace(/\D/g, '');
+    if (digits.length < 10) {
+      alert('Por favor ingrese un número válido con código de país.\nEj: +1 407 393 7977');
+      return;
+    }
+    localStorage.setItem('wa_recipient', digits);
+    document.getElementById('settings-number').value = '';
+    const msg = document.getElementById('saved-msg');
+    msg.style.display = 'inline';
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+    updateRecipientDisplay();
+  }
+
+  updateRecipientDisplay();
+
+  // ── Date ────────────────────────────────────────────────────────────────────
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById('fecha').value = `${yyyy}-${mm}-${dd}`;
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  function val(id) { return document.getElementById(id).value.trim(); }
+  function setError(id, hasError) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    hasError ? el.classList.add('has-error') : el.classList.remove('has-error');
+  }
+  function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  // ── Family ──────────────────────────────────────────────────────────────────
+  let memberCount = 0;
+
+  function toggleFamilyClick() {
+    const cb = document.getElementById('tiene-familia');
+    cb.checked = !cb.checked;
+    toggleFamily(cb);
+  }
+
+  function toggleFamily(cb) {
+    const section = document.getElementById('family-section');
+    section.style.display = cb.checked ? 'block' : 'none';
+    if (cb.checked && memberCount === 0) addFamilyMember();
+    if (!cb.checked) {
+      document.getElementById('family-members-container').innerHTML = '';
+      memberCount = 0;
+    }
+  }
+
+  function addFamilyMember() {
+    memberCount++;
+    const n = memberCount;
+    const container = document.getElementById('family-members-container');
+    const card = document.createElement('div');
+    card.className = 'family-member-card';
+    card.id = `member-${n}`;
+    card.innerHTML = `
+      <div class="family-card-header">
+        <span class="family-card-title">Familiar #${n}</span>
+        <button class="btn-remove-member" onclick="removeMember(${n})">Eliminar</button>
+      </div>
+      <div class="fields-stack">
+        <div class="field-group" id="fm${n}-fg-nombre">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="fm${n}-nombre" placeholder="Nombre completo" autocomplete="off" />
+          <span class="error-msg">Campo requerido.</span>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label>Relación</label>
+            <input type="text" id="fm${n}-relacion" placeholder="Esposa, Hijo..." autocomplete="off" />
+          </div>
+          <div class="field-group">
+            <label>Teléfono</label>
+            <input type="tel" id="fm${n}-telefono" placeholder="(000) 000-0000" inputmode="tel" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="fm${n}-email" placeholder="correo@ejemplo.com" inputmode="email" autocomplete="off" />
+        </div>
+        <div class="field-group">
+          <label>Edad</label>
+          <div class="age-chips">
+            <div class="age-chip"><input type="radio" name="fm${n}-edad" id="fm${n}-20s" value="20s"><label for="fm${n}-20s">20s</label></div>
+            <div class="age-chip"><input type="radio" name="fm${n}-edad" id="fm${n}-30s" value="30s"><label for="fm${n}-30s">30s</label></div>
+            <div class="age-chip"><input type="radio" name="fm${n}-edad" id="fm${n}-40s" value="40s"><label for="fm${n}-40s">40s</label></div>
+            <div class="age-chip"><input type="radio" name="fm${n}-edad" id="fm${n}-50s" value="50s"><label for="fm${n}-50s">50s</label></div>
+            <div class="age-chip"><input type="radio" name="fm${n}-edad" id="fm${n}-70" value="Más de 70"><label for="fm${n}-70">+70</label></div>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  }
+
+  function removeMember(id) {
+    const card = document.getElementById(`member-${id}`);
+    if (card) card.remove();
+  }
+
+  function getFamilyMembers() {
+    return [...document.querySelectorAll('.family-member-card')].map(card => {
+      const n = card.id.replace('member-', '');
+      const edadEl = card.querySelector(`input[name="fm${n}-edad"]:checked`);
+      return {
+        nombre:   document.getElementById(`fm${n}-nombre`)?.value.trim()   || '',
+        relacion: document.getElementById(`fm${n}-relacion`)?.value.trim() || '',
+        telefono: document.getElementById(`fm${n}-telefono`)?.value.trim() || '',
+        email:    document.getElementById(`fm${n}-email`)?.value.trim()    || '',
+        edad:     edadEl ? edadEl.value : '',
+        cardId:   n,
+      };
+    }).filter(m => m.nombre);
+  }
+
+  function validateFamilyMembers() {
+    let valid = true;
+    document.querySelectorAll('.family-member-card').forEach(card => {
+      const n = card.id.replace('member-', '');
+      const nombreEl = document.getElementById(`fm${n}-nombre`);
+      const fg = document.getElementById(`fm${n}-fg-nombre`);
+      if (!nombreEl?.value.trim()) { fg?.classList.add('has-error'); valid = false; }
+      else fg?.classList.remove('has-error');
+    });
+    return valid;
+  }
+
+  // ── Submit ──────────────────────────────────────────────────────────────────
+  function submitForm() {
+    let valid = true;
+
+    [
+      ['nombre','fg-nombre'], ['direccion','fg-direccion'], ['ciudad','fg-ciudad'],
+      ['estado','fg-estado'], ['cp','fg-cp'], ['telefono','fg-telefono'], ['invitado','fg-invitado']
+    ].forEach(([field, group]) => {
+      const empty = val(field) === '';
+      setError(group, empty);
+      if (empty) valid = false;
+    });
+
+    const emailBad = !validateEmail(val('email'));
+    setError('fg-email', emailBad);
+    if (emailBad) valid = false;
+
+    const ageSelected = document.querySelector('input[name="edad"]:checked');
+    if (!ageSelected) {
+      document.getElementById('age-group').classList.add('age-error');
+      document.getElementById('age-error-msg').style.display = 'block';
+      valid = false;
+    } else {
+      document.getElementById('age-group').classList.remove('age-error');
+      document.getElementById('age-error-msg').style.display = 'none';
+    }
+
+    const familyActive = document.getElementById('tiene-familia').checked;
+    if (familyActive && !validateFamilyMembers()) valid = false;
+
+    if (!valid) {
+      const firstErr = document.querySelector('.has-error, .age-error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Build message
+    const [fy, fm, fd] = document.getElementById('fecha').value.split('-');
+    const fechaDisplay = `${fd}/${fm}/${fy}`;
+    const visitaChecks = [...document.querySelectorAll('input[name="visita"]:checked')].map(c => c.value);
+    const estadoCivil = document.querySelector('input[name="estado_civil"]:checked');
+    const iglesia = val('iglesia') || 'N/A';
+
+    let msg = `*NUEVO VISITANTE — MICAR CHURCH*\n\n`;
+    msg += `*Fecha:* ${fechaDisplay}\n`;
+    msg += `*Nombre:* ${val('nombre')}\n`;
+    msg += `*Dirección:* ${val('direccion')}\n`;
+    msg += `*Ciudad:* ${val('ciudad')}\n`;
+    msg += `*Estado:* ${val('estado')}\n`;
+    msg += `*Código Postal:* ${val('cp')}\n`;
+    msg += `*Teléfono:* ${val('telefono')}\n`;
+    msg += `*Email:* ${val('email')}\n\n`;
+
+    if (visitaChecks.length > 0) {
+      msg += `*Opciones marcadas:*\n`;
+      visitaChecks.forEach(v => { msg += `  • ${v}\n`; });
+      msg += `\n`;
+    }
+
+    msg += `*Estado civil:* ${estadoCivil ? estadoCivil.value : 'No indicado'}\n`;
+    msg += `*Edad:* ${ageSelected.value}\n`;
+    msg += `*Iglesia actual:* ${iglesia}\n`;
+    msg += `*Invitado por:* ${val('invitado')}\n`;
+
+    if (familyActive) {
+      const members = getFamilyMembers();
+      if (members.length > 0) {
+        msg += `\n*FAMILIA (${members.length} miembro${members.length > 1 ? 's' : ''}):*\n`;
+        members.forEach((m, i) => {
+          msg += `\n_Familiar #${i+1}_\n`;
+          msg += `  Nombre: ${m.nombre}\n`;
+          if (m.relacion) msg += `  Relación: ${m.relacion}\n`;
+          if (m.edad)     msg += `  Edad: ${m.edad}\n`;
+          if (m.telefono) msg += `  Teléfono: ${m.telefono}\n`;
+          if (m.email)    msg += `  Email: ${m.email}\n`;
+        });
+      }
+    }
+
+    const encoded = encodeURIComponent(msg);
+    const phone = getNumber();
+
+    // Try desktop app first, fall back to WhatsApp Web after 1.5s if app doesn't open
+    const appUrl = `whatsapp://send?phone=${phone}&text=${encoded}`;
+    const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
+
+    // Use a hidden iframe trick to try the app protocol without navigating away
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    let appOpened = false;
+
+    // Listen for page blur — means the app opened and took focus
+    const onBlur = () => { appOpened = true; };
+    window.addEventListener('blur', onBlur);
+
+    iframe.src = appUrl;
+
+    // After 1.5s, if the app didn't open, fall back to WhatsApp Web
+    setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      document.body.removeChild(iframe);
+      if (!appOpened) {
+        window.open(webUrl, '_blank');
+      }
+    }, 1500);
+
+    document.getElementById('form-body').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+  }
+
+  // ── Reset ───────────────────────────────────────────────────────────────────
+  function resetForm() {
+    document.getElementById('success-screen').style.display = 'none';
+    document.getElementById('form-body').style.display = 'block';
+
+    ['nombre','direccion','ciudad','estado','cp','telefono','email','iglesia','invitado']
+      .forEach(id => { document.getElementById(id).value = ''; });
+
+    document.getElementById('fecha').value = `${yyyy}-${mm}-${dd}`;
+    document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => { el.checked = false; });
+    document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+    document.getElementById('age-group').classList.remove('age-error');
+    document.getElementById('age-error-msg').style.display = 'none';
+    document.getElementById('tiene-familia').checked = false;
+    document.getElementById('family-section').style.display = 'none';
+    document.getElementById('family-members-container').innerHTML = '';
+    memberCount = 0;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
